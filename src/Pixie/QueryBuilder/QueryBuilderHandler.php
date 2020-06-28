@@ -236,7 +236,16 @@ class QueryBuilderHandler
         unset($this->statements['limit']);
         unset($this->statements['offset']);
 
-        $count = $this->aggregate('count');
+        $countClause = '*';
+        if ($this->statements['groupBys'] ?? false) {
+            if (count($this->statements['groupBys']) > 1) {
+                throw new Exception('Unable to count query with multiple group-bys');
+            }
+            $countClause = 'DISTINCT(' . $this->statements['groupBys'][0] . ')';
+            unset($this->statements['groupBys'][0]);
+        }
+
+        $count = $this->aggregate('count', $countClause);
         $this->statements = $originalStatements;
 
         return $count;
@@ -247,12 +256,12 @@ class QueryBuilderHandler
      *
      * @return int
      */
-    protected function aggregate($type)
+    protected function aggregate($type, $field = '*')
     {
         // Get the current selects
         $mainSelects = isset($this->statements['selects']) ? $this->statements['selects'] : null;
         // Replace select with a scalar value like `count`
-        $this->statements['selects'] = array($this->raw($type . '(*) as field'));
+        $this->statements['selects'] = array($this->raw($type . '(' . $field . ') as field'));
         $row = $this->get();
 
         // Set the select as it was
