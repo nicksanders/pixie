@@ -524,7 +524,10 @@ class QueryBuilderHandler
     public function groupBy($field)
     {
         $field = $this->addTablePrefix($field);
-        $this->addStatement('groupBys', $field);
+        // Dedup
+        if (!isset($this->statements['groupBys']) || !is_array($this->statements['groupBys']) || !in_array($field, $this->statements['groupBys'])) {
+            $this->addStatement('groupBys', $field);
+        }
         return $this;
     }
 
