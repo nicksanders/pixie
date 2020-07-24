@@ -43,6 +43,13 @@ abstract class BaseAdapter
         // Select
         $selects = $this->arrayStr($statements['selects'], ', ');
 
+        // Select bindings (from raw)
+        $selectBindings = [];
+        foreach ($statements['selects'] as $statement) {
+            if ($statement instanceof Raw) {
+                $selectBindings = array_merge($selectBindings, $statement->getBindings());
+            }
+        }
 
         // Wheres
         list($whereCriteria, $whereBindings) = $this->buildCriteriaWithType($statements, 'wheres', 'WHERE');
@@ -91,6 +98,7 @@ abstract class BaseAdapter
         $sql = $this->concatenateQuery($sqlArray);
 
         $bindings = array_merge(
+            $selectBindings,
             $whereBindings,
             $havingBindings
         );
