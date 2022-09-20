@@ -304,7 +304,7 @@ class QueryBuilderHandler
 
     /**
      * @param QueryBuilderHandler $queryBuilder
-     * @param null $alias
+     * @param null|string $alias
      *
      * @return Raw
      */
